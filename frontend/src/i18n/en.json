@@ -1,0 +1,93 @@
+{
+  "app": {
+    "title": "Crop Advisor",
+    "subtitle": "Smart Farming Assistant"
+  },
+  "auth": {
+    "phoneNumber": "Phone Number",
+    "enterPhone": "Enter your mobile number",
+    "sendOTP": "Send OTP",
+    "verifyOTP": "Verify OTP",
+    "enterOTP": "Enter 6-digit OTP",
+    "resendOTP": "Resend OTP",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome Back",
+    "weatherSummary": "Today's Weather",
+    "addFarm": "Add Farm Plot",
+    "viewFarms": "My Farm Plots",
+    "getRecommendations": "Get Crop Recommendations",
+    "quickActions": "Quick Actions"
+  },
+  "farm": {
+    "title": "Farm Plots",
+    "addPlot": "Add New Plot",
+    "editPlot": "Edit Plot",
+    "deletePlot": "Delete Plot",
+    "plotName": "Plot Name",
+    "location": "Location",
+    "area": "Area (acres)",
+    "detectLocation": "Auto-detect Location",
+    "soilInfo": "Soil Information",
+    "nitrogen": "Nitrogen (N)",
+    "phosphorus": "Phosphorus (P)",
+    "potassium": "Potassium (K)",
+    "ph": "pH Level",
+    "save": "Save",
+    "cancel": "Cancel",
+    "deleteConfirm": "Are you sure you want to delete this farm plot?",
+    "noPlots": "No farm plots yet. Add your first plot!"
+  },
+  "weather": {
+    "title": "Weather Forecast",
+    "today": "Today",
+    "forecast": "7-Day Forecast",
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "rainfall": "Rainfall",
+    "windSpeed": "Wind Speed",
+    "highAlert": "High Alert",
+    "moderateAlert": "Moderate Alert",
+    "noAlert": "No Alert"
+  },
+  "soil": {
+    "title": "Soil Data",
+    "healthCard": "Soil Health Card",
+    "manualEntry": "Enter Manually",
+    "lastUpdated": "Last Updated",
+    "update": "Update Data",
+    "noData": "No soil data available. Please add manually."
+  },
+  "recommendations": {
+    "title": "Crop Recommendations",
+    "selectPlot": "Select Farm Plot",
+    "getRecommendations": "Get Recommendations",
+    "topCrops": "Top Recommended Crops",
+    "suitability": "Suitability",
+    "listenExplanation": "Listen to Explanation",
+    "noCrops": "No recommendations yet. Select a plot to get started."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "profile": "Profile",
+    "about": "About",
+    "version": "Version"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "add": "Add"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "app": {
+    "title": "फसल सलाहकार",
+    "subtitle": "स्मार्ट खेती सहायक"
+  },
+  "auth": {
+    "phoneNumber": "फ़ोन नंबर",
+    "enterPhone": "अपना मोबाइल नंबर दर्ज करें",
+    "sendOTP": "OTP भेजें",
+    "verifyOTP": "OTP सत्यापित करें",
+    "enterOTP": "6 अंकों का OTP दर्ज करें",
+    "resendOTP": "OTP पुनः भेजें",
+    "login": "लॉगिन",
+    "logout": "लॉगआउट"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "welcome": "स्वागत है",
+    "weatherSummary": "आज का मौसम",
+    "addFarm": "खेत जोड़ें",
+    "viewFarms": "मेरे खेत",
+    "getRecommendations": "फसल सुझाव प्राप्त करें",
+    "quickActions": "त्वरित कार्य"
+  },
+  "farm": {
+    "title": "खेत के प्लॉट",
+    "addPlot": "नया प्लॉट जोड़ें",
+    "editPlot": "प्लॉट संपादित करें",
+    "deletePlot": "प्लॉट हटाएं",
+    "plotName": "प्लॉट का नाम",
+    "location": "स्थान",
+    "area": "क्षेत्रफल (एकड़)",
+    "detectLocation": "स्थान स्वचालित पता लगाएं",
+    "soilInfo": "मिट्टी की जानकारी",
+    "nitrogen": "नाइट्रोजन (N)",
+    "phosphorus": "फॉस्फोरस (P)",
+    "potassium": "पोटैशियम (K)",
+    "ph": "pH स्तर",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "deleteConfirm": "क्या आप वाकई इस खेत प्लॉट को हटाना चाहते हैं?",
+    "noPlots": "अभी तक कोई खेत प्लॉट नहीं। अपना पहला प्लॉट जोड़ें!"
+  },
+  "weather": {
+    "title": "मौसम पूर्वानुमान",
+    "today": "आज",
+    "forecast": "7 दिन का पूर्वानुमान",
+    "temperature": "तापमान",
+    "humidity": "आर्द्रता",
+    "rainfall": "वर्षा",
+    "windSpeed": "हवा की गति",
+    "highAlert": "उच्च सतर्कता",
+    "moderateAlert": "मध्यम सतर्कता",
+    "noAlert": "कोई सतर्कता नहीं"
+  },
+  "soil": {
+    "title": "मिट्टी डेटा",
+    "healthCard": "मिट्टी स्वास्थ्य कार्ड",
+    "manualEntry": "मैन्युअल रूप से दर्ज करें",
+    "lastUpdated": "अंतिम अद्यतन",
+    "update": "डेटा अपडेट करें",
+    "noData": "कोई मिट्टी डेटा उपलब्ध नहीं है। कृपया मैन्युअल रूप से जोड़ें।"
+  },
+  "recommendations": {
+    "title": "फसल सुझाव",
+    "selectPlot": "खेत प्लॉट चुनें",
+    "getRecommendations": "सुझाव प्राप्त करें",
+    "topCrops": "शीर्ष अनुशंसित फसलें",
+    "suitability": "उपयुक्तता",
+    "listenExplanation": "स्पष्टीकरण सुनें",
+    "noCrops": "अभी तक कोई सुझाव नहीं। शुरू करने के लिए एक प्लॉट चुनें।"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "language": "भाषा",
+    "profile": "प्रोफ़ाइल",
+    "about": "के बारे में",
+    "version": "संस्करण"
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "back": "वापस",
+    "next": "अगला",
+    "done": "हो गया",
+    "close": "बंद करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "view": "देखें",
+    "add": "जोड़ें"
+  }
+}
