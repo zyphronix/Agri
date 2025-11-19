@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 // Pages
 import Login from "./pages/Login";
 import VerifyOTP from "./pages/VerifyOTP";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import FarmPlots from "./pages/FarmPlots";
 import AddFarmPlot from "./pages/AddFarmPlot";
@@ -60,6 +61,14 @@ const App = () => (
                 element={
                   <PublicRoute>
                     <VerifyOTP />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <PublicRoute>
+                    <Register />
                   </PublicRoute>
                 }
               />

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '@/lib/api';
 
 interface User {
   id: string;
@@ -10,7 +11,9 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (phoneNumber: string) => Promise<void>;
-  verifyOTP: (otp: string) => Promise<void>;
+  verifyOTP: (phoneNumber: string, otp: string) => Promise<void>;
+  loginWithPassword: (phoneNumber: string, password: string) => Promise<void>;
+  register: (name: string, phoneNumber: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -22,6 +25,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : null;
   });
 
+  // On mount, if token exists but user is not set, try fetching current user
+  useEffect(() => {
+    const init = async () => {
+      const token = localStorage.getItem('token');
+      if (token && !user) {
+        try {
+          const res = await api.get('/api/auth/me');
+          const u = res?.data || res;
+          setUser({ id: u.id, phoneNumber: u.phone, name: u.name });
+        } catch (err: any) {
+          // Clear token if unauthorized or request failed
+          try {
+            if (err?.status === 401) {
+              localStorage.removeItem('token');
+            }
+          } catch {}
+          localStorage.removeItem('token');
+        }
+      }
+    };
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -31,37 +58,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const login = async (phoneNumber: string) => {
-    // Mock login - just store the phone number
-    console.log('Sending OTP to:', phoneNumber);
-    // In real implementation, this would call an API
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Send OTP via backend
+    try {
+      await api.post('/api/auth/send-otp', { phone: phoneNumber });
+    } catch (e: any) {
+      const msg = e?.body?.message || e?.message || 'Failed to send OTP';
+      throw new Error(msg);
+    }
   };
 
-  const verifyOTP = async (otp: string) => {
-    // Mock OTP verification
-    console.log('Verifying OTP:', otp);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock user data
-    const mockUser: User = {
-      id: '1',
-      phoneNumber: '1234567890',
-      name: 'Farmer',
-    };
-    
-    setUser(mockUser);
+  const verifyOTP = async (phoneNumber: string, otp: string) => {
+    try {
+      const res = await api.post('/api/auth/verify-otp', { phone: phoneNumber, otp });
+      const { token, user } = res?.data || res;
+      if (token) localStorage.setItem('token', token);
+      setUser({ id: user.id, phoneNumber: user.phone, name: user.name });
+    } catch (e: any) {
+      const msg = e?.body?.message || e?.message || 'Invalid OTP';
+      if (e?.status === 401) {
+        localStorage.removeItem('token');
+      }
+      throw new Error(msg);
+    }
+  };
+
+  const loginWithPassword = async (phoneNumber: string, password: string) => {
+    try {
+      const res = await api.post('/api/auth/login', { phone: phoneNumber, password });
+      const { token, user } = res?.data || res;
+      if (token) localStorage.setItem('token', token);
+      setUser({ id: user.id, phoneNumber: user.phone, name: user.name });
+    } catch (e: any) {
+      if (e?.status === 401) localStorage.removeItem('token');
+      const msg = e?.body?.message || e?.message || 'Invalid credentials';
+      throw new Error(msg);
+    }
+  };
+
+  const register = async (name: string, phoneNumber: string, password: string) => {
+    try {
+      const res = await api.post('/api/auth/register', { name, phone: phoneNumber, password });
+      const { token, user } = res?.data || res;
+      if (token) localStorage.setItem('token', token);
+      setUser({ id: user.id, phoneNumber: user.phone, name: user.name });
+    } catch (e: any) {
+      const msg = e?.body?.message || e?.message || 'Registration failed';
+      throw new Error(msg);
+    }
   };
 
   const logout = () => {
     setUser(null);
+    try {
+      api.post('/api/auth/logout').catch(() => {});
+    } catch {}
+    localStorage.removeItem('token');
   };
 
   return (
     <AuthContext.Provider value={{ 
       user, 
       isAuthenticated: !!user, 
-      login, 
-      verifyOTP, 
+      login,
+      verifyOTP,
+      loginWithPassword,
+      register,
       logout 
     }}>
       {children}

@@ -2,7 +2,7 @@ export interface SoilData {
   nitrogen: number;
   phosphorus: number;
   potassium: number;
-  ph: number;
+  pH: number;
 }
 
 export interface FarmPlot {
@@ -13,8 +13,8 @@ export interface FarmPlot {
     lon: number;
     address?: string;
   };
-  area: number; // in acres
-  soilData: SoilData;
+  area: number;
+  soil: SoilData;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,72 +30,79 @@ let mockFarmPlots: FarmPlot[] = [
       address: 'Near Delhi, India',
     },
     area: 5,
-    soilData: {
+    soil: {
       nitrogen: 45,
       phosphorus: 30,
       potassium: 35,
-      ph: 6.5,
+      pH: 6.5,
     },
     createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 7 * 86400000).toISOString(),
   },
 ];
 
+import api from '@/lib/api';
+
+function normalizeFarm(f: any): FarmPlot {
+  return {
+    id: f._id || f.id,
+    name: f.name,
+    area: f.area ?? 0,
+    location: f.location || { lat: 0, lon: 0 },
+    soil: f.soil || { nitrogen: 0, phosphorus: 0, potassium: 0, pH: 7 },
+    createdAt: f.createdAt || new Date().toISOString(),
+    updatedAt: f.updatedAt || new Date().toISOString(),
+  };
+}
+
 export async function getFarmPlots(): Promise<FarmPlot[]> {
-  // TODO: Replace with actual API call
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return [...mockFarmPlots];
+  const res = await api.get('/api/farms');
+  const data = res?.data || res || [];
+  return Array.isArray(data) ? data.map(normalizeFarm) : [];
 }
 
 export async function getFarmPlot(id: string): Promise<FarmPlot | null> {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  return mockFarmPlots.find(plot => plot.id === id) || null;
+  const res = await api.get(`/api/farms/${id}`);
+  const data = res?.data || res || null;
+  return data ? normalizeFarm(data) : null;
 }
 
-export async function createFarmPlot(plot: Omit<FarmPlot, 'id' | 'createdAt' | 'updatedAt'>): Promise<FarmPlot> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  const newPlot: FarmPlot = {
-    ...plot,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  
-  mockFarmPlots.push(newPlot);
-  return newPlot;
+export async function createFarmPlot(plot: { name: string; area: number; location: { lat: number; lon: number; address?: string }; soil: SoilData }): Promise<FarmPlot> {
+  const res = await api.post('/api/farms', plot);
+  const data = res?.data || res;
+  return normalizeFarm(data);
 }
 
 export async function updateFarmPlot(id: string, updates: Partial<Omit<FarmPlot, 'id' | 'createdAt'>>): Promise<FarmPlot> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  const index = mockFarmPlots.findIndex(plot => plot.id === id);
-  if (index === -1) {
-    throw new Error('Farm plot not found');
-  }
-  
-  mockFarmPlots[index] = {
-    ...mockFarmPlots[index],
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  };
-  
-  return mockFarmPlots[index];
+  const res = await api.put(`/api/farms/${id}`, updates);
+  const data = res?.data || res;
+  return normalizeFarm(data);
 }
 
 export async function deleteFarmPlot(id: string): Promise<void> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  mockFarmPlots = mockFarmPlots.filter(plot => plot.id !== id);
+  await api.del(`/api/farms/${id}`);
 }
 
 export async function detectLocation(): Promise<{ lat: number; lon: number; address?: string }> {
-  // TODO: Replace with actual geolocation API
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Mock location
+  if ('geolocation' in navigator) {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        },
+        (err) => {
+          // fallback to server-side or mock
+          resolve({ lat: 28.6139 + (Math.random() - 0.5) * 0.1, lon: 77.2090 + (Math.random() - 0.5) * 0.1, address: 'Detected location (fallback)' });
+        },
+        { timeout: 5000 }
+      );
+    });
+  }
+
+  // fallback mock
   return {
     lat: 28.6139 + (Math.random() - 0.5) * 0.1,
     lon: 77.2090 + (Math.random() - 0.5) * 0.1,
-    address: 'Detected location near Delhi',
+    address: 'Detected location (fallback)',
   };
 }

@@ -50,12 +50,12 @@ export default function EditFarmPlot() {
             name: plot.name,
             area: plot.area.toString(),
             location: plot.location,
-            soilData: {
-              nitrogen: plot.soilData.nitrogen.toString(),
-              phosphorus: plot.soilData.phosphorus.toString(),
-              potassium: plot.soilData.potassium.toString(),
-              ph: plot.soilData.ph.toString(),
-            },
+              soilData: {
+                nitrogen: plot.soil.nitrogen.toString(),
+                phosphorus: plot.soil.phosphorus.toString(),
+                potassium: plot.soil.potassium.toString(),
+                ph: plot.soil.pH.toString(),
+              },
           });
         } else {
           toast.error('Farm plot not found');
@@ -100,11 +100,11 @@ export default function EditFarmPlot() {
         name: formData.name,
         area: parseFloat(formData.area),
         location: formData.location,
-        soilData: {
+        soil: {
           nitrogen: parseFloat(formData.soilData.nitrogen) || 0,
           phosphorus: parseFloat(formData.soilData.phosphorus) || 0,
           potassium: parseFloat(formData.soilData.potassium) || 0,
-          ph: parseFloat(formData.soilData.ph) || 7,
+          pH: parseFloat(formData.soilData.ph) || 7,
         },
       });
       toast.success('Farm plot updated successfully');

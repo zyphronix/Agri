@@ -1,9 +1,10 @@
 import { SoilData } from './farmService';
+import api from '@/lib/api';
 
 export interface SoilHealthCard {
   cardNumber: string;
   issuedDate: string;
-  soilData: SoilData;
+  soil: SoilData;
   organicCarbon?: number;
   electricalConductivity?: number;
 }
@@ -12,35 +13,35 @@ export interface SoilHealthCard {
 const mockSoilHealthCard: SoilHealthCard = {
   cardNumber: 'SHC123456789',
   issuedDate: new Date(Date.now() - 90 * 86400000).toISOString(),
-  soilData: {
+  soil: {
     nitrogen: 45,
     phosphorus: 30,
     potassium: 35,
-    ph: 6.5,
+    pH: 6.5,
   },
   organicCarbon: 0.5,
   electricalConductivity: 0.3,
 };
 
 export async function getSoilHealthCard(farmPlotId: string): Promise<SoilHealthCard | null> {
-  // TODO: Replace with actual API call to fetch soil health card
-  console.log('Fetching soil health card for farm plot:', farmPlotId);
-  
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // 50% chance of having a soil health card (mock behavior)
-  if (Math.random() > 0.5) {
-    return mockSoilHealthCard;
+  try {
+    const res = await api.get(`/api/soil/${farmPlotId}`);
+    return res?.data || res || null;
+  } catch (e) {
+    console.warn('Soil API failed, returning mock soil health card', e);
+    // fall back to mock behavior
+    if (Math.random() > 0.5) return mockSoilHealthCard;
+    return null;
   }
-  
-  return null;
 }
 
 export async function updateSoilData(farmPlotId: string, soilData: SoilData): Promise<void> {
-  // TODO: Replace with actual API call
-  console.log('Updating soil data for farm plot:', farmPlotId, soilData);
-  
-  await new Promise(resolve => setTimeout(resolve, 500));
+  try {
+    // Use farm update endpoint to update soil data
+    await api.put(`/api/farms/${farmPlotId}`, { soil: soilData });
+  } catch (e) {
+    console.warn('Failed to update soil data on server, ignoring', e);
+  }
 }
 
 export async function analyzeSoilQuality(soilData: SoilData): Promise<{
@@ -50,13 +51,13 @@ export async function analyzeSoilQuality(soilData: SoilData): Promise<{
   // TODO: Replace with actual analysis API
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  const { nitrogen, phosphorus, potassium, ph } = soilData;
+  const { nitrogen, phosphorus, potassium, pH } = soilData;
   
   // Simple mock analysis
   const suggestions: string[] = [];
   let quality: 'excellent' | 'good' | 'moderate' | 'poor' = 'good';
   
-  if (ph < 6.0 || ph > 7.5) {
+  if (pH < 6.0 || pH > 7.5) {
     suggestions.push('pH level needs adjustment');
     quality = 'moderate';
   }

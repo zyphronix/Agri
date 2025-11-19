@@ -60,8 +60,8 @@ export const CropCard = ({ crop, rank }: CropCardProps) => {
       </div>
 
       <div className="space-y-2 mb-4">
-        {crop.reasons.map((reason, index) => (
-          <div key={index} className="flex items-start gap-2">
+        {crop.reasons.map((reason) => (
+          <div key={reason} className="flex items-start gap-2">
             <TrendingUp className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
             <p className="text-sm text-muted-foreground">{reason}</p>
           </div>

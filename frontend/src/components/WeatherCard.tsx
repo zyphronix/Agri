@@ -6,13 +6,14 @@ import { useLanguage } from '@/context/LanguageContext';
 interface WeatherCardProps {
   weather: WeatherData;
   compact?: boolean;
+  location?: string;
 }
 
-export const WeatherCard = ({ weather, compact = false }: WeatherCardProps) => {
+export const WeatherCard = ({ weather, compact = false, location }: WeatherCardProps) => {
   const { t } = useLanguage();
 
   const getWeatherIcon = () => {
-    const condition = weather.condition.toLowerCase();
+    const condition = (weather.condition || '').toLowerCase();
     if (condition.includes('rain')) return <CloudRain className="h-8 w-8 text-accent" />;
     if (condition.includes('cloud')) return <Cloud className="h-8 w-8 text-muted-foreground" />;
     return <Sun className="h-8 w-8 text-warning" />;
@@ -31,8 +32,11 @@ export const WeatherCard = ({ weather, compact = false }: WeatherCardProps) => {
           <div className="flex items-center gap-3">
             {getWeatherIcon()}
             <div>
-              <p className="text-2xl font-bold text-foreground">{weather.temperature.current}°C</p>
-              <p className="text-sm text-muted-foreground">{weather.condition}</p>
+              <p className="text-2xl font-bold text-foreground">{weather.temperature?.current ?? '--'}°C</p>
+              <p className="text-sm text-muted-foreground">{weather.condition ?? 'Unknown'}</p>
+              {location && (
+                <p className="text-sm font-medium text-foreground">{location}</p>
+              )}
             </div>
           </div>
           <div className="text-right">
@@ -54,6 +58,9 @@ export const WeatherCard = ({ weather, compact = false }: WeatherCardProps) => {
     <Card className={`p-6 ${getAlertColor()}`}>
       <div className="flex items-start justify-between mb-4">
         <div>
+          {location && (
+            <p className="text-sm font-medium text-foreground mb-1">{location}</p>
+          )}
           <p className="text-sm text-muted-foreground mb-1">
             {new Date(weather.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
           </p>
@@ -61,9 +68,9 @@ export const WeatherCard = ({ weather, compact = false }: WeatherCardProps) => {
             {getWeatherIcon()}
             <p className="text-4xl font-bold text-foreground">{weather.temperature.current}°C</p>
           </div>
-          <p className="text-muted-foreground mt-2">{weather.condition}</p>
+            <p className="text-muted-foreground mt-2">{weather.condition ?? 'Unknown'}</p>
         </div>
-        {weather.alert !== 'none' && (
+            {weather.alert !== 'none' && (
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${weather.alert === 'high' ? 'bg-destructive text-destructive-foreground' : 'bg-warning text-warning-foreground'}`}>
             {t(`weather.${weather.alert}Alert`)}
           </span>

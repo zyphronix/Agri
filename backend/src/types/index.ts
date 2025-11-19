@@ -48,6 +48,13 @@ export interface ForecastDay {
   humidity: number;
   rainfall: number;
   weather: string;
+  temperature?: {
+    min: number;
+    max: number;
+    current: number;
+  };
+  windSpeed?: number;
+  alert?: 'none' | 'moderate' | 'high';
 }
 
 export interface SoilData {

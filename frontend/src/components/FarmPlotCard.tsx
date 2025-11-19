@@ -16,10 +16,10 @@ export const FarmPlotCard = ({ plot, onEdit, onDelete }: FarmPlotCardProps) => {
   const navigate = useNavigate();
 
   const getSoilQualityColor = () => {
-    const { nitrogen, phosphorus, potassium, ph } = plot.soilData;
+    const { nitrogen, phosphorus, potassium, pH } = plot.soil;
     const avgNutrient = (nitrogen + phosphorus + potassium) / 3;
-    const isPhGood = ph >= 6.0 && ph <= 7.5;
-    
+    const isPhGood = pH >= 6.0 && pH <= 7.5;
+
     if (avgNutrient > 40 && isPhGood) return 'text-success';
     if (avgNutrient > 30) return 'text-warning';
     return 'text-destructive';
@@ -67,14 +67,14 @@ export const FarmPlotCard = ({ plot, onEdit, onDelete }: FarmPlotCardProps) => {
       <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
         <div>
           <p className="text-xs text-muted-foreground">N-P-K</p>
-          <p className={`text-sm font-medium ${getSoilQualityColor()}`}>
-            {plot.soilData.nitrogen}-{plot.soilData.phosphorus}-{plot.soilData.potassium}
+            <p className={`text-sm font-medium ${getSoilQualityColor()}`}>
+            {plot.soil.nitrogen}-{plot.soil.phosphorus}-{plot.soil.potassium}
           </p>
         </div>
         <div>
           <p className="text-xs text-muted-foreground">pH</p>
-          <p className={`text-sm font-medium ${getSoilQualityColor()}`}>
-            {plot.soilData.ph}
+            <p className={`text-sm font-medium ${getSoilQualityColor()}`}>
+            {plot.soil.pH}
           </p>
         </div>
       </div>

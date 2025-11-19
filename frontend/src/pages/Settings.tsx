@@ -39,6 +39,9 @@ export default function Settings() {
             </div>
             <div>
               <h3 className="font-semibold text-foreground">{t('settings.profile')}</h3>
+              {user?.name ? (
+                <p className="text-sm font-medium text-foreground">{user.name}</p>
+              ) : null}
               <p className="text-sm text-muted-foreground">{user?.phoneNumber}</p>
             </div>
           </div>

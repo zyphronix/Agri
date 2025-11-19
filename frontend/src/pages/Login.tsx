@@ -12,8 +12,10 @@ import { toast } from 'sonner';
 
 export default function Login() {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<'otp' | 'password'>('otp');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithPassword } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -27,11 +29,22 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await login(phoneNumber);
-      toast.success('OTP sent successfully');
-      navigate('/verify-otp', { state: { phoneNumber } });
+      if (mode === 'otp') {
+        await login(phoneNumber);
+        toast.success('OTP sent successfully');
+        navigate('/verify-otp', { state: { phoneNumber } });
+      } else {
+        await loginWithPassword(phoneNumber, password);
+        toast.success('Logged in successfully');
+        navigate('/dashboard');
+      }
     } catch (error) {
-      toast.error('Failed to send OTP. Please try again.');
+      const msg = (error as Error).message || 'Login failed';
+      if (mode === 'otp') {
+        toast.error(msg.includes('OTP') ? msg : 'Failed to send OTP. Please try again.');
+      } else {
+        toast.error(msg.includes('Invalid') ? 'Invalid phone or password' : 'Login failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -68,18 +81,51 @@ export default function Login() {
               </div>
             </div>
 
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-foreground">Login method</label>
+              <div className="space-x-2">
+                <button type="button" onClick={() => setMode('otp')} className={`px-3 py-1 rounded ${mode === 'otp' ? 'bg-primary text-white' : 'bg-transparent'}`}>OTP</button>
+                <button type="button" onClick={() => setMode('password')} className={`px-3 py-1 rounded ${mode === 'password' ? 'bg-primary text-white' : 'bg-transparent'}`}>Password</button>
+              </div>
+            </div>
+
+            {mode === 'password' && (
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">Password</label>
+                <Input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full text-lg py-6"
-              disabled={isLoading || phoneNumber.length !== 10}
+              disabled={
+                isLoading || phoneNumber.length !== 10 || (mode === 'password' && password.length < 6)
+              }
             >
-              {isLoading ? <LoadingSpinner size="sm" /> : t('auth.sendOTP')}
+              {isLoading ? (
+                <LoadingSpinner size="sm" />
+              ) : mode === 'otp' ? (
+                t('auth.sendOTP')
+              ) : (
+                t('auth.login') || 'Login'
+              )}
             </Button>
           </form>
         </Card>
 
         <div className="mt-6 flex justify-center">
           <LanguageSelector />
+        </div>
+
+        <div className="mt-4 text-center">
+          <a href="/register" className="text-sm text-primary underline">Create an account</a>
         </div>
       </div>
     </div>

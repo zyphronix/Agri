@@ -26,9 +26,14 @@ export default function VerifyOTP() {
       return;
     }
 
+    if (!phoneNumber) {
+      toast.error('Missing phone number');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await verifyOTP(otp);
+      await verifyOTP(phoneNumber, otp);
       toast.success('Login successful');
       navigate('/dashboard');
     } catch (error) {

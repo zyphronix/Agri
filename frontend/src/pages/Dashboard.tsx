@@ -16,18 +16,39 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [locationName, setLocationName] = useState<string | undefined>(undefined);
   const [farmPlots, setFarmPlots] = useState<FarmPlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [weatherData, plots] = await Promise.all([
-          getCurrentWeather(),
-          getFarmPlots(),
-        ]);
-        setWeather(weatherData);
+        // First load farm plots, then request weather for the first plot (if available)
+        const plots = await getFarmPlots();
         setFarmPlots(plots);
+
+        let weatherData;
+        if (plots && plots.length > 0) {
+          // Request weather for the first plot by farmId (backend supports /api/weather/:farmId)
+          weatherData = await getCurrentWeather(undefined, undefined, plots[0].id);
+          if (weatherData && (weatherData as any).location) setLocationName((weatherData as any).location);
+        } else if (navigator && 'geolocation' in navigator) {
+          // Fallback: try browser geolocation
+          const coords = await new Promise<GeolocationPosition | null>((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => resolve(pos),
+              () => resolve(null),
+              { timeout: 8000 }
+            );
+          });
+
+          if (coords) {
+            weatherData = await getCurrentWeather(coords.coords.latitude, coords.coords.longitude);
+            if (weatherData && (weatherData as any).location) setLocationName((weatherData as any).location);
+          }
+        }
+
+        if (weatherData) setWeather((weatherData as any).weather || weatherData);
       } catch (error) {
         console.error('Failed to load dashboard data:', error);
       } finally {
@@ -59,7 +80,7 @@ export default function Dashboard() {
         {weather && (
           <div>
             <h2 className="text-lg font-semibold text-foreground mb-3">{t('dashboard.weatherSummary')}</h2>
-            <WeatherCard weather={weather} compact />
+            <WeatherCard weather={weather} compact location={locationName} />
           </div>
         )}
 

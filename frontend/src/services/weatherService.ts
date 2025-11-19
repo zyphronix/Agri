@@ -79,17 +79,62 @@ const mockWeatherData: WeatherData[] = [
   },
 ];
 
-export async function getWeatherForecast(lat?: number, lon?: number): Promise<WeatherData[]> {
-  // TODO: Replace with actual API call
-  console.log('Fetching weather for coordinates:', lat, lon);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  return mockWeatherData;
+import api from '@/lib/api';
+
+export async function getWeatherForecast(lat?: number, lon?: number, farmId?: string): Promise<{ location?: string; forecast: WeatherData[] }> {
+  // If we have a farmId call farm weather endpoint, else send coords if provided
+    try {
+      if (farmId) {
+        const res = await api.get(`/api/weather/${farmId}`);
+        // backend returns { success: true, data: ForecastDay[] , location }
+        const payload = res; // keep full payload (api.get already returns parsed body)
+        const location = payload && (payload.location || payload.city) ? (payload.location || payload.city) : undefined;
+        const raw = payload && payload.success && payload.data ? payload.data : Array.isArray(payload) ? payload : [];
+      // normalize backend ForecastDay[] to frontend WeatherData[]
+      const mapped = (raw as any[]).map((f) => ({
+        date: f.date || new Date().toISOString().split('T')[0],
+        temperature: {
+          min: (f.temperature?.min ?? f.temp_min ?? f.temp ?? 0),
+          max: (f.temperature?.max ?? f.temp_max ?? f.temp ?? 0),
+          current: (f.temperature?.current ?? f.temp ?? 0),
+        },
+        humidity: f.humidity ?? f.main?.humidity ?? 0,
+        rainfall: f.rainfall ?? (f.rain && (f.rain['3h'] ?? f.rain['1h'])) ?? 0,
+        windSpeed: f.windSpeed ?? f.wind?.speed ?? 0,
+        condition: f.condition ?? f.weather ?? 'Unknown',
+        alert: f.alert ?? 'none',
+      }));
+      return { location, forecast: mapped };
+    }
+
+    const query = lat !== undefined && lon !== undefined ? `?lat=${lat}&lon=${lon}` : '';
+    const res = await api.get(`/api/weather${query}`);
+    const payload = res; // api.get returns parsed response body
+    const location = payload && (payload.location || payload.city) ? (payload.location || payload.city) : undefined;
+    const raw = payload && payload.success && payload.data ? payload.data : Array.isArray(payload) ? payload : [];
+    const mapped = (raw as any[]).map((f) => ({
+      date: f.date || new Date().toISOString().split('T')[0],
+      temperature: {
+        min: (f.temperature?.min ?? f.temp_min ?? f.temp ?? 0),
+        max: (f.temperature?.max ?? f.temp_max ?? f.temp ?? 0),
+        current: (f.temperature?.current ?? f.temp ?? 0),
+      },
+      humidity: f.humidity ?? f.main?.humidity ?? 0,
+      rainfall: f.rainfall ?? (f.rain && (f.rain['3h'] ?? f.rain['1h'])) ?? 0,
+      windSpeed: f.windSpeed ?? f.wind?.speed ?? 0,
+      condition: f.condition ?? f.weather ?? 'Unknown',
+      alert: f.alert ?? 'none',
+    }));
+    if (mapped.length === 0) return { location, forecast: [] };
+    return { location, forecast: mapped };
+  } catch (e) {
+    // fallback to mock data on failure
+    console.warn('Weather API failed, using mock data', e);
+    return { location: undefined, forecast: mockWeatherData };
+  }
 }
 
-export async function getCurrentWeather(lat?: number, lon?: number): Promise<WeatherData> {
-  const forecast = await getWeatherForecast(lat, lon);
-  return forecast[0];
+export async function getCurrentWeather(lat?: number, lon?: number, farmId?: string): Promise<{ location?: string; weather?: WeatherData }> {
+  const resp = await getWeatherForecast(lat, lon, farmId);
+  return { location: resp.location, weather: resp.forecast && resp.forecast.length > 0 ? resp.forecast[0] : undefined };
 }

@@ -13,4 +13,7 @@ router.post(
   recommendationController.getRecommendations
 );
 
+// Seasonal climate aggregates for recommendation page
+router.get('/seasonal', authMiddleware, recommendationController.getSeasonalClimate);
+
 export default router;

@@ -61,15 +61,16 @@ export default function AddFarmPlot() {
 
     setIsLoading(true);
     try {
+      // map frontend form fields to backend expected schema (`soil` with `pH`)
       await createFarmPlot({
         name: formData.name,
-        area: parseFloat(formData.area),
+        area: parseFloat(formData.area) || 0,
         location: formData.location,
-        soilData: {
+        soil: {
           nitrogen: parseFloat(formData.soilData.nitrogen) || 0,
           phosphorus: parseFloat(formData.soilData.phosphorus) || 0,
           potassium: parseFloat(formData.soilData.potassium) || 0,
-          ph: parseFloat(formData.soilData.ph) || 7,
+          pH: parseFloat(formData.soilData.ph) || 7,
         },
       });
       toast.success('Farm plot added successfully');
