@@ -46,17 +46,7 @@ const startServer = async () => {
     await connectDB();
     
     app.listen(PORT, () => {
-      console.log(`
-╔════════════════════════════════════════════╗
-║   🌾 Crop Advisor Backend Server          ║
-║                                            ║
-║   Environment: ${config.nodeEnv.padEnd(28)} ║
-║   Port: ${PORT.padEnd(35)} ║
-║   Database: Connected ✅                   ║
-║                                            ║
-║   API Docs: http://localhost:${PORT}/api    ║
-╚════════════════════════════════════════════╝
-      `);
+      console.log('Server running!!');
     });
   } catch (error) {
     console.error('Failed to start server:', error);
