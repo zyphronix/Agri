@@ -1,8 +1,12 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions, Secret } from 'jsonwebtoken';
 import config from '../config/env';
 
 export const generateToken = (userId: string, phone: string): string => {
-  return jwt.sign({ id: userId, phone }, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn,
-  });
+  const payload = { id: userId, phone };
+
+  const options: SignOptions = {
+    expiresIn: config.jwtExpiresIn, // must be string | number
+  };
+
+  return jwt.sign(payload, config.jwtSecret as Secret, options);
 };
