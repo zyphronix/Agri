@@ -15,8 +15,8 @@ class RecommendationService {
       throw new Error('Farm not found');
     }
 
-    // Gather required data
-    const soilData = await soilService.getSoilDataForFarm(farmId);
+    // Use soil values provided by the user in the DB (do not call external soil APIs)
+    const farmSoil = farm.soil ? (farm.soil.toObject ? farm.soil.toObject() : farm.soil) : { nitrogen: 0, phosphorus: 0, potassium: 0, pH: 7 };
 
     // Fetch seasonal climate aggregates (90-day)
     let seasonal: any = null;
@@ -33,19 +33,19 @@ class RecommendationService {
       };
     }
 
-    // Build payload expected by Python prediction API
+    // Build payload expected by Python prediction API using DB-stored soil values
     const mlPayload = {
-      N: Number(soilData.nitrogen || farm.soil?.nitrogen || 0),
-      P: Number(soilData.phosphorus || farm.soil?.phosphorus || 0),
-      K: Number(soilData.potassium || farm.soil?.potassium || 0),
+      N: Number(farmSoil.nitrogen ?? 0),
+      P: Number(farmSoil.phosphorus ?? 0),
+      K: Number(farmSoil.potassium ?? 0),
       temperature: seasonal?.temperature_90_day_avg ?? null,
       humidity: seasonal?.humidity_90_day_avg ?? null,
-      ph: Number(farm.soil?.pH ?? soilData.pH ?? 7),
+      ph: Number(farmSoil.pH ?? 7),
       rainfall: seasonal?.rainfall_90_day_sum ?? null,
     };
 
     // Call external Python prediction service and persist the result
-    const mlUrl = config.mlServiceUrl || 'https://agri-python-backend.onrender.com/predict';
+    const mlUrl = config.mlServiceUrl;
     try {
       const resp = await axios.post(mlUrl, mlPayload, {
         headers: { 'Content-Type': 'application/json' },
@@ -68,20 +68,9 @@ class RecommendationService {
       return resp.data as RecommendationResponse;
     } catch (error: any) {
       console.error('Prediction service call failed:', error?.message || error);
-      // Save failed attempt
-      try {
-        await PredictionHistory.create({
-          farmId: farmId.toString(),
-          input: mlPayload,
-          response: { error: error?.message || error },
-          success: false,
-        });
-      } catch (saveErr) {
-        console.error('Failed to save failed prediction history:', saveErr);
-      }
-
-      // Fallback to mock recommendations
-      return mockRecommendations;
+      // Do not persist mock or failed predictions when ML service fails.
+      // Surface the error to the caller so the request can fail loudly.
+      throw error;
     }
   }
 

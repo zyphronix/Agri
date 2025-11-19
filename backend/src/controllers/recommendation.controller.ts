@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import recommendationService from '../services/recommendation.service';
+import PredictionHistory from '../models/PredictionHistory';
 
 class RecommendationController {
   async getRecommendations(req: AuthRequest, res: Response, next: NextFunction) {
@@ -12,6 +13,20 @@ class RecommendationController {
         success: true,
         data: recommendations,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /api/recommendations/history?farmId=...
+  async getHistory(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const farmId = String((req.query as any).farmId || req.body.farmId || '');
+      if (!farmId) return res.status(400).json({ success: false, message: 'farmId is required' });
+
+      const items = await PredictionHistory.find({ farmId }).sort({ createdAt: -1 }).limit(20).lean();
+
+      res.status(200).json({ success: true, data: items });
     } catch (error) {
       next(error);
     }

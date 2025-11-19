@@ -1,206 +1,147 @@
-# 🌾 Crop Advisor - Weather-Adaptive Crop Suggestion System
 
-A Progressive Web App (PWA) that provides AI-powered crop recommendations based on real-time weather data and soil conditions. Built for farmers with a mobile-first, low-literacy-friendly interface.
+-----
+
+# 🌾 Crop Advisor – Weather-Adaptive Crop Suggestion System
+
+**Crop Advisor** is a mobile-first Progressive Web App (PWA) that recommends the best crops based on weather, soil nutrients, and farm location.
+
+> Built for accessibility with large buttons, simple language, and multilingual support.
+
+-----
 
 ## 🚀 Features
 
-### Core Functionality
-- **User Authentication** - Phone number + OTP verification
-- **Farm Plot Management** - Add, edit, and delete farm plots with GPS location
-- **Weather Forecasting** - 7-day weather forecast with alerts
-- **Soil Data Management** - Track N-P-K levels and pH
-- **Crop Recommendations** - AI-powered suggestions with suitability scores
-- **Audio Explanations** - Voice-based guidance for low-literacy users
-- **Multi-language Support** - English and Hindi (easily extendable)
+  * **User Authentication:** OTP-based mobile login.
+  * **Farm Management:** Add, Edit, and Delete farm plots.
+  * **Location Services:** GPS location support & integration-ready maps.
+  * **Soil Analysis:** Manual soil input (N-P-K values + pH levels).
+  * **Weather Integration:** 7-day weather forecast.
+  * **Smart Recommendations:** Top 3 crop suggestions (Name + Confidence %).
+  * **Localization:** Full support for **English** & **Hindi**.
+  * **PWA Capabilities:** Installable on devices with offline support.
+  * **Real-time Data:** Connected to backend services for live updates.
 
-### Technical Features
-- ✅ Progressive Web App (PWA)
-- ✅ Offline-capable
-- ✅ Mobile-first responsive design
-- ✅ Installable on mobile devices
-- ✅ Service worker for caching
-- ✅ i18n internationalization
-
-## 🛠 Tech Stack
-
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **UI Components**: Custom + shadcn/ui
-- **State Management**: React Query + Context API
-- **Routing**: React Router v6
-- **Icons**: Lucide React
-- **Notifications**: Sonner
-
-## 📱 User Flows
-
-1. **Authentication**
-   - Login with phone number
-   - Verify OTP
-   - Auto-redirect to dashboard
-
-2. **Dashboard**
-   - View today's weather summary
-   - Quick actions (Add farm, View farms, Get recommendations)
-   - Recent farm plots overview
-
-3. **Farm Management**
-   - List all farm plots
-   - Add new plot with GPS detection
-   - Edit plot details
-   - Delete plots (with confirmation)
-   - Input soil data (N, P, K, pH)
-
-4. **Weather**
-   - Current weather conditions
-   - 7-day forecast with charts
-   - Weather alerts (high/moderate)
-
-5. **Recommendations**
-   - Select farm plot
-   - Get top 5 crop suggestions
-   - View suitability scores
-   - Listen to audio explanations
-
-6. **Settings**
-   - Change language (EN/HI)
-   - View profile
-   - Logout
+-----
 
 ## 🗂 Project Structure
 
-```
+```text
 src/
-├── components/          # Reusable UI components
-│   ├── ui/             # Base shadcn components
-│   ├── BottomNav.tsx   # Bottom navigation
-│   ├── CropCard.tsx    # Crop recommendation card
-│   ├── FarmPlotCard.tsx
-│   ├── LanguageSelector.tsx
-│   ├── LoadingSpinner.tsx
-│   ├── MapPlaceholder.tsx
-│   └── WeatherCard.tsx
-├── context/            # React contexts
-│   ├── AuthContext.tsx
-│   └── LanguageContext.tsx
-├── i18n/              # Internationalization
-│   ├── en.json
-│   ├── hi.json
-│   └── index.ts
-├── pages/             # Page components
-│   ├── AddFarmPlot.tsx
-│   ├── Dashboard.tsx
-│   ├── EditFarmPlot.tsx
-│   ├── FarmPlots.tsx
-│   ├── Login.tsx
-│   ├── NotFound.tsx
-│   ├── Recommendations.tsx
-│   ├── Settings.tsx
-│   ├── VerifyOTP.tsx
-│   └── Weather.tsx
-├── services/          # API service layer (mocked)
-│   ├── authService.ts
-│   ├── farmService.ts
-│   ├── recommendationService.ts
-│   ├── soilService.ts
-│   └── weatherService.ts
-├── App.tsx           # Main app component
-└── main.tsx         # Entry point
+├── components/                # Reusable UI components
+│   ├── ui/                    # Base UI elements from shadcn/ui
+│   ├── BottomNav.tsx          # Bottom navigation bar for mobile UI
+│   ├── CropCard.tsx           # Card to display a crop recommendation
+│   ├── FarmPlotCard.tsx       # Card to display farm plot summaries
+│   ├── LanguageSelector.tsx   # Dropdown for language switching
+│   ├── LoadingSpinner.tsx     # Reusable loading indicator
+│   ├── MapPlaceholder.tsx     # Placeholder map UI (integration-ready)
+│   └── WeatherCard.tsx        # Card showing weather information
+│
+├── context/                   # Global app contexts
+│   ├── AuthContext.tsx        # Handles login state + JWT storage
+│   └── LanguageContext.tsx    # Manages selected language across app
+│
+├── i18n/                      # Multi-language support
+│   ├── en.json                # English translations
+│   ├── hi.json                # Hindi translations
+│   └── index.ts               # i18n configuration + helper functions
+│
+├── pages/                     # Screens/pages of the app
+│   ├── AddFarmPlot.tsx        # Form to create new farm plot
+│   ├── Dashboard.tsx          # Home dashboard (weather + quick actions)
+│   ├── EditFarmPlot.tsx       # Edit existing farm plot
+│   ├── FarmPlots.tsx          # List of all farm plots
+│   ├── Login.tsx              # Phone number login screen
+│   ├── NotFound.tsx           # 404 page
+│   ├── Recommendations.tsx    # Shows top 3 crop suggestions
+│   ├── Settings.tsx           # Language + account settings
+│   ├── VerifyOTP.tsx          # OTP verification screen
+│   └── Weather.tsx            # Full weather forecast view
+│
+├── services/                   # API service layer (connected to backend)
+│   ├── authService.ts         # Login + OTP requests
+│   ├── farmService.ts         # Farm plot CRUD operations
+│   ├── recommendationService.ts# Fetches crop recommendations
+│   ├── soilService.ts         # Soil data fetching
+│   └── weatherService.ts      # Weather data fetching
+│
+├── App.tsx                    # Main application wrapper with routes
+└── main.tsx                   # Entry point for rendering the React app
 ```
 
-## 🔌 Service Integration
+-----
 
-All services are currently mocked with placeholder functions. To integrate real APIs:
+## 🛠 Tech Stack
 
-### Weather Service
-Replace `getWeatherForecast()` in `src/services/weatherService.ts` with actual API calls to weather services (e.g., OpenWeatherMap, Weather.gov).
+  * **Core:** React 18 + TypeScript
+  * **Build Tool:** Vite
+  * **Styling:** Tailwind CSS + shadcn/ui
+  * **State Management:** Context API + React Query
+  * **Routing:** React Router v6
+  * **Icons:** Lucide Icons
+  * **Notifications:** Sonner
+  * **PWA:** Service Worker + Web Manifest
 
-### Farm Service
-Replace CRUD operations in `src/services/farmService.ts` with backend API calls.
-
-### Recommendation Service
-Replace `getCropRecommendations()` in `src/services/recommendationService.ts` with ML model API calls.
-
-### Soil Service
-Replace `getSoilHealthCard()` in `src/services/soilService.ts` with government database API integration.
-
-## 🌐 Adding More Languages
-
-1. Create new JSON file in `src/i18n/` (e.g., `ta.json` for Tamil)
-2. Add language to `src/i18n/index.ts`:
-```typescript
-import ta from './ta.json';
-
-export const translations = {
-  en,
-  hi,
-  ta, // Add here
-};
-
-export const languages = [
-  // ... existing
-  { code: 'ta' as Language, name: 'Tamil', nativeName: 'தமிழ்' },
-];
-```
+-----
 
 ## 📦 Installation
 
-```bash
-# Install dependencies
-npm install
+1.  **Install dependencies:**
 
-# Run development server
-npm run dev
+    ```bash
+    npm install
+    ```
 
-# Build for production
-npm run build
+2.  **Run development server:**
 
-# Preview production build
-npm run preview
+    ```bash
+    npm run dev
+    ```
+
+3.  **Build for production:**
+
+    ```bash
+    npm run build
+    ```
+
+4.  **Preview production build:**
+
+    ```bash
+    npm run preview
+    ```
+
+-----
+
+## 🌐 Environment Setup
+
+Create a `.env` file in the root directory and add your backend URL:
+
+```env
+VITE_API_BASE_URL=your-backend-url
 ```
 
-## 🔧 Environment Setup
+-----
 
-This app runs entirely on the frontend with mocked data. No environment variables needed for development.
+## 📱 PWA Features
 
-For production, you'll need to:
-1. Set up backend APIs for each service
-2. Configure API endpoints in service files
-3. Add authentication tokens/API keys as needed
+This application is designed to function like a native app:
 
-## 📱 PWA Installation
+  * **Installable:** Can be added to the home screen on Android, iOS, and Desktop.
+  * **Offline Mode:** View cached screens and previously loaded data without an internet connection.
+  * **Performance:** Optimized for fast load times on 3G/4G networks.
 
-### Desktop
-- Chrome: Click install icon in address bar
-- Edge: Click "App available" prompt
+-----
 
-### Mobile
-- **iOS**: Safari → Share → Add to Home Screen
-- **Android**: Chrome → Menu → Add to Home Screen
+## 🎨 Design Philosophy
 
-## 🎨 Design System
+  * **Clean and Farmer-Friendly:** Minimalistic interface focusing on utility.
+  * **Accessibility:** Large buttons and high-contrast colors for outdoor visibility.
+  * **Icon-First Navigation:** Intuitive UI that requires minimal reading.
 
-The app uses a farmer-friendly design with:
-- **Primary Color**: Agricultural Green (#16a34a)
-- **Secondary Color**: Earth Brown
-- **Accent Color**: Sky Blue (for weather)
-- Large, touch-friendly buttons
-- High-contrast text for readability
-- Icon-first navigation for low-literacy users
-
-## 🤝 Contributing
-
-This is a template/starter project. Feel free to:
-- Add real API integrations
-- Enhance ML recommendation logic
-- Improve UI/UX
-- Add more languages
-- Implement voice recognition for input
-
-## 📄 License
-
-MIT License - Feel free to use this project as a template for your own agricultural tech solutions.
+-----
 
 ## 🙏 Acknowledgments
 
-Built with love for farmers worldwide 🌾
+Built to empower farmers with data-backed insights for better crop choices. 🌾💚
+
+-----

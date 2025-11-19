@@ -1,7 +1,7 @@
 import { CropRecommendation } from '@/services/recommendationService';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Volume2, TrendingUp } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState } from 'react';
 
@@ -12,8 +12,6 @@ interface CropCardProps {
 
 export const CropCard = ({ crop, rank }: CropCardProps) => {
   const { t, language } = useLanguage();
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-
   const getScoreColor = () => {
     if (crop.suitabilityScore >= 80) return 'text-success';
     if (crop.suitabilityScore >= 60) return 'text-warning';
@@ -26,12 +24,7 @@ export const CropCard = ({ crop, rank }: CropCardProps) => {
     return 'bg-muted';
   };
 
-  const handlePlayAudio = () => {
-    // Mock audio playback
-    setIsPlayingAudio(true);
-    console.log('Playing audio explanation for:', crop.name);
-    setTimeout(() => setIsPlayingAudio(false), 3000);
-  };
+  // no audio support — audio explanations removed
 
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow">
@@ -68,15 +61,7 @@ export const CropCard = ({ crop, rank }: CropCardProps) => {
         ))}
       </div>
 
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={handlePlayAudio}
-        disabled={isPlayingAudio}
-      >
-        <Volume2 className={`h-4 w-4 mr-2 ${isPlayingAudio ? 'animate-pulse' : ''}`} />
-        {t('recommendations.listenExplanation')}
-      </Button>
+      {/* audio explanations removed */}
     </Card>
   );
 };

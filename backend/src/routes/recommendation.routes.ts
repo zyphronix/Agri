@@ -16,4 +16,7 @@ router.post(
 // Seasonal climate aggregates for recommendation page
 router.get('/seasonal', authMiddleware, recommendationController.getSeasonalClimate);
 
+// Prediction history for a farm
+router.get('/history', authMiddleware, recommendationController.getHistory);
+
 export default router;
