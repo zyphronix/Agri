@@ -1,73 +1,135 @@
-Agri — Backend
 
-## Tech stack
+-----
 
-- Node.js (TypeScript)
-- Express
-- Mongoose (MongoDB)
-- Axios (external API calls)
+# 🌾 Crop Advisor – Backend API
 
-## Quick start (development)
+This is the server-side application for **Crop Advisor**, handling user authentication, farm data management, weather aggregation, and orchestration between the frontend and the ML prediction service.
 
-1. Install dependencies
+-----
 
-```powershell
-cd backend
-npm install
+## 🛠 Tech Stack
+
+  * **Runtime:** Node.js (TypeScript)
+  * **Framework:** Express.js
+  * **Database:** MongoDB (via Mongoose)
+  * **HTTP Client:** Axios (for external API calls to Weather/ML services)
+
+-----
+
+## ⚡ Quick Start (Development)
+
+1.  **Install dependencies:**
+
+    ```bash
+    cd backend
+    npm install
+    ```
+
+2.  **Run development server:**
+
+    ```bash
+    npm run dev
+    ```
+
+3.  **Server Status:**
+    The server listens on the port defined in your `.env` file. By default, the app expects an active MongoDB connection to start successfully.
+
+-----
+
+## 🔐 Environment Variables
+
+Create a `.env` file in the root of the `backend` directory.
+
+```env
+# Database
+MONGO_URI=mongodb://localhost:27017/crop_advisor
+
+# Security
+JWT_SECRET=your_super_secret_jwt_key
+PORT=5000
+
+# External APIs
+WEATHER_API_KEY=your_openweather_api_key
+OTP_PROVIDER_API_KEY=your_sms_provider_key
+
+# Machine Learning Service
+# Link to Python backend: [Check GitHub Repository]
+ML_SERVICE_URL=http://localhost:8000/predict
 ```
 
-2. Run development server
+-----
 
-```powershell
-npm run dev
+## 📡 Notable Endpoints
+
+All endpoints are prefixed with `/api`. Most require a valid JWT token in the header.
+
+### 👤 Authentication
+
+  * `POST /api/auth/login` — Login or request an OTP.
+  * `POST /api/auth/verify` — Verify OTP and issue JWT access token.
+
+### 🚜 Farm Management
+
+  * `GET /api/farms` — List the authenticated user's farm plots.
+  * `POST /api/farms` — Create a new farm plot.
+
+### 🌦️ Weather & Climate
+
+  * `GET /api/weather` — Fetch weather forecasts (proxied/cached).
+
+### 🤖 Recommendations (ML Integration)
+
+  * `POST /api/recommendations`
+      * Requests crop recommendations for a specific `farmId`.
+      * Calls the configured **ML Service**.
+      * Persists successful responses to `PredictionHistory`.
+  * `GET /api/recommendations/history?farmId={id}`
+      * Returns recent prediction history for a specific farm.
+  * `GET /api/recommendations/seasonal?farmId={id}`
+      * Returns 90-day seasonal aggregates for the farm.
+
+-----
+
+## 💾 Data & Persistence
+
+The application uses **MongoDB** via **Mongoose**. Key data models include:
+
+  * **`User`**: Stores profile and authentication data.
+  * **`FarmPlot`**: Stores geolocation, soil data (N-P-K, pH), and plot names.
+  * **`PredictionHistory`**: An audit log that stores inputs sent to the ML model and the successful crop suggestions returned.
+
+-----
+
+## 🧠 Behavior Notes
+
+  * **ML Integration:** The recommendation flow prioritizes the `ML_SERVICE_URL`. Successful ML responses are saved. If the ML service fails, the system **does not** persist mock or fallback predictions to ensure data integrity.
+  * **Seasonal Data:** The backend includes a seasonal climate fetcher backed by **Open-Meteo**. It calculates 90-day aggregates. The recommendation service composes payloads using both DB soil values and these seasonal aggregates before sending them to the ML model.
+  * **Safety:** OTP sending is guarded in development mode to prevent accidental SMS charges or spam.
+
+-----
+
+## 🐛 Debugging & Development
+
+  * **External Calls:** `console.log` statements are included around external provider calls (Weather/ML) to help trace request/response cycles.
+  * **Common Proxy Issue:** If the frontend fetch to `/api/...` returns the frontend's `index.html` (HTML instead of JSON), verify:
+    1.  The `VITE_API_URL` in the frontend is correct.
+    2.  The Vite proxy configuration (if used) matches the backend port.
+
+-----
+
+## ✅ Tests & Linting
+
+Run linting and TypeScript checks using the repository scripts:
+
+```bash
+npm run lint
+npm run build
 ```
 
-3. The server listens on the port set in your environment (see below). By default the app expects a MongoDB connection.
+-----
 
-## Important environment variables
-
-Create a `.env` file or set these variables in your environment:
-
-- `MONGO_URI` — MongoDB connection string
-- `JWT_SECRET` — secret used for signing JWT tokens
-- `PORT` — server port (optional, default in config)
-- `WEATHER_API_KEY` — OpenWeather API key
-- `ML_SERVICE_URL` — external ML prediction service URL (check my github for python backend implementation)
-- `OTP_PROVIDER_API_KEY` — provider key for OTP/SMS (if used)
-
-## Notable endpoints
-
-- `POST /api/auth/login` — login / request OTP
-- `POST /api/auth/verify` — verify OTP and issue JWT
-- `GET /api/farms` — list user's farm plots (authenticated)
-- `POST /api/farms` — create a farm plot (authenticated)
-- `GET /api/weather` — weather forecasts (authenticated)
-
-- `POST /api/recommendations` — request crop recommendations for a `farmId` (authenticated). This calls the configured ML service and persists successful responses to `PredictionHistory`.
-- `GET /api/recommendations/history?farmId={id}` — returns recent prediction history for a farm (authenticated).
-- `GET /api/recommendations/seasonal?farmId={id}` — returns 90-day seasonal aggregates for the farm (authenticated).
-
-All endpoints are under `/api` and most are protected by JWT-based `authMiddleware`.
-
-## Data & persistence
-
-- MongoDB is used via Mongoose. Key models include `User`, `FarmPlot`, and `PredictionHistory` (stores successful prediction inputs and responses).
-
-## Behavior notes
-
-- The recommendation flow prefers the configured `ML_SERVICE_URL`. Successful ML responses are saved to `PredictionHistory`. Failed ML calls do not persist mock/fallback predictions.
-- The backend provides a seasonal climate fetcher backed by Open‑Meteo for 90-day aggregates; the recommendations service composes ML payloads from DB soil values and seasonal aggregates.
-- OTP sending is guarded in development to avoid accidental SMS sends.
-
-## Debugging & development tips
-
-- Use `console` logs added around external provider calls for quick debugging.
-- If frontend fetch to `/api/...` returns the frontend `index.html`, ensure the frontend `VITE_API_URL` is set correctly or proxy is configured.
-
-## Tests and linting
-
-- Run linting and TypeScript checks using your repository scripts (e.g., `npm run lint`, `npm run build`).
-
-## License
+## 📜 License
 
 MIT
+
+-----
