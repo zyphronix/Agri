@@ -4,6 +4,7 @@ import { RecommendationResponse } from '../types';
 import { mockRecommendations } from '../mock/recommendations';
 import weatherService from './weather.service';
 import soilService from './soil.service';
+const PredictionHistory = require('../models/PredictionHistory').default;
 
 class RecommendationService {
   async getCropRecommendations(farmId: string): Promise<RecommendationResponse> {
@@ -14,33 +15,74 @@ class RecommendationService {
       throw new Error('Farm not found');
     }
 
-    // Gather all required data
-    const [weatherForecast, soilData] = await Promise.all([
-      weatherService.fetchWeather(farm.location.lat, farm.location.lon),
-      soilService.getSoilDataForFarm(farmId),
-    ]);
+    // Gather required data
+    const soilData = await soilService.getSoilDataForFarm(farmId);
 
-    // weatherService.fetchWeather now returns ForecastDay[] (array). Use the first item as 'current'
-    const currentWeather = Array.isArray(weatherForecast) && weatherForecast.length > 0 ? weatherForecast[0] : null;
+    // Fetch seasonal climate aggregates (90-day)
+    let seasonal: any = null;
+    try {
+      seasonal = await this.getSeasonalClimateForFarm(farmId);
+    } catch (err) {
+      console.warn('Failed to fetch seasonal climate for farm, falling back to current weather', err);
+      const wf = await weatherService.fetchWeather(farm.location.lat, farm.location.lon);
+      const currentWeather = Array.isArray(wf) && wf.length > 0 ? wf[0] : null;
+      seasonal = {
+        temperature_90_day_avg: currentWeather ? currentWeather.temp : null,
+        humidity_90_day_avg: currentWeather ? currentWeather.humidity : null,
+        rainfall_90_day_sum: currentWeather ? currentWeather.rainfall : null,
+      };
+    }
 
-    // Prepare payload for ML service
-    const payload = {
-      location: farm.location,
-      weather: {
-        temperature: currentWeather ? currentWeather.temp : null,
-        humidity: currentWeather ? currentWeather.humidity : null,
-        rainfall: currentWeather ? currentWeather.rainfall : null,
-      },
-      soil: {
-        nitrogen: soilData.nitrogen,
-        phosphorus: soilData.phosphorus,
-        potassium: soilData.potassium,
-        pH: soilData.pH,
-      },
+    // Build payload expected by Python prediction API
+    const mlPayload = {
+      N: Number(soilData.nitrogen || farm.soil?.nitrogen || 0),
+      P: Number(soilData.phosphorus || farm.soil?.phosphorus || 0),
+      K: Number(soilData.potassium || farm.soil?.potassium || 0),
+      temperature: seasonal?.temperature_90_day_avg ?? null,
+      humidity: seasonal?.humidity_90_day_avg ?? null,
+      ph: Number(farm.soil?.pH ?? soilData.pH ?? 7),
+      rainfall: seasonal?.rainfall_90_day_sum ?? null,
     };
 
-    // Call ML microservice
-    return this.callMLService(payload);
+    // Call external Python prediction service and persist the result
+    const mlUrl = config.mlServiceUrl || 'https://agri-python-backend.onrender.com/predict';
+    try {
+      const resp = await axios.post(mlUrl, mlPayload, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 30000,
+      });
+
+      // Save prediction history
+      try {
+        await PredictionHistory.create({
+          farmId: farmId.toString(),
+          input: mlPayload,
+          response: resp.data,
+          success: resp.status === 200,
+        });
+      } catch (saveErr) {
+        console.error('Failed to save prediction history:', saveErr);
+      }
+
+      // Return prediction response (assume service returns proper structure)
+      return resp.data as RecommendationResponse;
+    } catch (error: any) {
+      console.error('Prediction service call failed:', error?.message || error);
+      // Save failed attempt
+      try {
+        await PredictionHistory.create({
+          farmId: farmId.toString(),
+          input: mlPayload,
+          response: { error: error?.message || error },
+          success: false,
+        });
+      } catch (saveErr) {
+        console.error('Failed to save failed prediction history:', saveErr);
+      }
+
+      // Fallback to mock recommendations
+      return mockRecommendations;
+    }
   }
 
   private async callMLService(payload: any): Promise<RecommendationResponse> {

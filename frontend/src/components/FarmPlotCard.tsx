@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Edit, Trash2, Sprout } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { getSeasonalClimateForFarm } from '@/services/recommendationService';
 
 interface FarmPlotCardProps {
   plot: FarmPlot;
@@ -14,6 +16,9 @@ interface FarmPlotCardProps {
 export const FarmPlotCard = ({ plot, onEdit, onDelete }: FarmPlotCardProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [seasonal, setSeasonal] = useState<any | null>(null);
+  const [loadingSeasonal, setLoadingSeasonal] = useState(false);
+  const [seasonalError, setSeasonalError] = useState<string | null>(null);
 
   const getSoilQualityColor = () => {
     const { nitrogen, phosphorus, potassium, pH } = plot.soil;
@@ -86,6 +91,42 @@ export const FarmPlotCard = ({ plot, onEdit, onDelete }: FarmPlotCardProps) => {
       >
         {t('dashboard.getRecommendations')}
       </Button>
+
+      <div className="mt-3">
+        <Button
+          className="w-full"
+          size="sm"
+          variant="ghost"
+          onClick={async () => {
+            setSeasonalError(null);
+            setLoadingSeasonal(true);
+            try {
+              const res = await getSeasonalClimateForFarm(plot.id);
+              if (!res) throw new Error('No data');
+              setSeasonal(res);
+            } catch (err: any) {
+              setSeasonal(null);
+              setSeasonalError(err?.message || 'Failed to load seasonal data');
+            } finally {
+              setLoadingSeasonal(false);
+            }
+          }}
+        >
+          {loadingSeasonal ? 'Loading 90-day climate...' : 'Load 90-day climate'}
+        </Button>
+
+        {seasonalError && (
+          <p className="mt-2 text-sm text-destructive">{seasonalError}</p>
+        )}
+
+        {seasonal && (
+          <div className="mt-3 border-t pt-3 text-sm text-muted-foreground">
+            <p><strong>90-day Avg Temp:</strong> {seasonal.temperature_90_day_avg ?? '—'} °C</p>
+            <p><strong>90-day Avg Humidity:</strong> {seasonal.humidity_90_day_avg ?? '—'} %</p>
+            <p><strong>90-day Rainfall Sum:</strong> {seasonal.rainfall_90_day_sum ?? '—'} mm</p>
+          </div>
+        )}
+      </div>
     </Card>
   );
 };

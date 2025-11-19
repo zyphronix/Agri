@@ -27,7 +27,29 @@ export async function getCropRecommendations(farmPlot: FarmPlot): Promise<CropRe
   // Call backend recommendation endpoint
   try {
     const res = await api.post('/api/recommendations', { farmId: farmPlot.id });
-    return res?.data || res || [];
+    // Backend may return { success: true, data: { crops: [...] } } or { success: true, data: [...] }
+    const payload = res?.data || res;
+
+    // If payload contains .crops use it
+    if (payload && typeof payload === 'object') {
+      if (Array.isArray(payload)) {
+        return payload as CropRecommendation[];
+      }
+      if (Array.isArray((payload as any).crops)) {
+        return (payload as any).crops as CropRecommendation[];
+      }
+      if (Array.isArray((payload as any).recommendations)) {
+        return (payload as any).recommendations as CropRecommendation[];
+      }
+    }
+
+    // Fallback: if it's a single object with crop items under unknown key, try to extract array values
+    if (payload && typeof payload === 'object') {
+      const vals = Object.values(payload).find((v) => Array.isArray(v));
+      if (Array.isArray(vals)) return vals as CropRecommendation[];
+    }
+
+    return [];
   } catch (e) {
     console.warn('Recommendations API failed, falling back to mock', e);
     // fallback to previous mock logic
@@ -75,4 +97,16 @@ export async function generateAudioExplanation(text: string, language: 'en' | 'h
   
   // Return mock audio URL
   return 'mock-audio-explanation.mp3';
+}
+
+export async function getSeasonalClimateForFarm(farmId: string): Promise<any> {
+  try {
+    const res = await api.get(`/api/recommendations/seasonal?farmId=${encodeURIComponent(farmId)}`);
+    // backend returns { success: true, data: { ... } }
+    const payload = res?.data || res;
+    return payload?.data || payload || null;
+  } catch (err) {
+    console.warn('Failed to fetch seasonal climate for farm', err);
+    return null;
+  }
 }
