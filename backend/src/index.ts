@@ -38,21 +38,23 @@ app.get('/', (req, res) => {
 // Error handler (must be last)
 app.use(errorHandler);
 
+const PORT = process.env.PORT;
+
 // Start server
 const startServer = async () => {
   try {
     await connectDB();
     
-    app.listen(config.port, () => {
+    app.listen(PORT, () => {
       console.log(`
 ╔════════════════════════════════════════════╗
 ║   🌾 Crop Advisor Backend Server          ║
 ║                                            ║
 ║   Environment: ${config.nodeEnv.padEnd(28)} ║
-║   Port: ${config.port.toString().padEnd(35)} ║
+║   Port: ${PORT.padEnd(35)} ║
 ║   Database: Connected ✅                   ║
 ║                                            ║
-║   API Docs: http://localhost:${config.port}/api    ║
+║   API Docs: http://localhost:${PORT}/api    ║
 ╚════════════════════════════════════════════╝
       `);
     });
